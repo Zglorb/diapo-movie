@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Random HTML Page</title>
+</head>
+<body>
+    <div id="main">
+        <div id="empty">
+        </div>
+        <div id="movie">
+            <div class="container">
+                <div class="poster">
+                    <img class="border" src="/poster.jpg" alt="poster" />
+                </div>
+                <div class="title">
+                  <div class="director dosis">Realisateur</div>
+                  <div class="moviename dosis">FILM</div>
+                </div>
+                <div class="actors">
+                </div>
+                <div class="diapo">
+                    <img class="border" style="height: calc(100% - 20px);" src="/screen.jpg" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const channel = new BroadcastChannel('cacaprout');
+        const messageContainer = document.getElementById("messageContainer");
+        let state = {
+            movieName: '',
+            moviePoster: '',
+            year: '',
+            director: '',
+            actors: [],
+            diapo: ''
+        }
+
+        function displayState(){
+            document.querySelector('.moviename').innerHTML = `${state.movieName} (${state.year.slice(0, 4)})`;
+            document.querySelector('.director').innerHTML = state.director;
+            document.querySelector('.poster img').src = state.moviePoster;
+            document.querySelector('.diapo img').src = state.diapo;
+            const actors = document.querySelector('.actors');
+            actors.innerHTML = '';
+            state.actors.forEach(actor => {
+                const actorElement = document.createElement('div');
+                const name = document.createElement('div');
+                name.classList.add('actorName');
+                name.classList.add('dosis');
+                const profile = document.createElement('img');
+                profile.src = `https://image.tmdb.org/t/p/w500${actor.profile_path}`;
+                actorElement.appendChild(profile);
+                name.innerHTML = actor.name;
+                actorElement.appendChild(name);
+                actors.appendChild(actorElement);
+                actorElement.classList.add('actor');
+            });
+        }
+
+        channel.onmessage = function(event) {
+            console.log(event);
+            const message = event.data;
+            state = message;
+            console.log(state);
+            displayState();
+        };
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@800&display=swap');
+        .dosis {
+        font-family: "Dosis", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 800;
+        font-style: normal;
+        }
+        #main {
+            display: flex;
+        }
+        #empty {
+            width: 35%;
+        }
+        #movie {
+            width: 65%;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 0.9fr 1.2fr repeat(2, 1fr);
+            gap: 10px 10px; 
+            grid-template-rows: 18% 18% 58%;
+            grid-auto-flow: row;
+            grid-template-areas:
+                "poster title title title"
+                "poster actors actors actors"
+                "diapo diapo diapo diapo";
+            width: 100%;
+            height: 100vh;
+        }
+
+.poster { grid-area: poster; }
+.poster img { height: calc(100% - 20px); }
+
+.title {  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "moviename"
+    "director";
+  grid-area: title;
+}
+
+.director {
+    grid-area: director;
+    -webkit-text-fill-color: black; /* Will override color (regardless of order) */
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: white;
+    font-size: 2em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.moviename {
+    grid-area: moviename;
+    font-size: 3.5em;
+    font-weight: bold;
+    -webkit-text-fill-color: white; /* Will override color (regardless of order) */
+    -webkit-text-stroke-width: 4px;
+    -webkit-text-stroke-color: black;
+}
+
+    .actors {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: 1fr;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    align-items: start;
+    grid-template-areas:
+        ". . . . .";
+    grid-area: actors;
+    }
+
+    .diapo { grid-area: diapo; }
+    .actor {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100px;
+    }
+    .actor img {
+        height: 100px;
+        width: 100px;
+        border: 10px solid white;
+        border-radius: 7px;
+        box-shadow: 0 0 10px 0 black;
+        object-fit: cover;
+    }
+
+    .border {
+        border: 10px solid white;
+        border-radius: 7px;
+        box-shadow: 0 0 10px 0 black;
+    }
+    .actorName {
+        font-size: 1.2em;
+        -webkit-text-fill-color: rgb(0, 0, 0); /* Will override color (regardless of order) */
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: white;
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    body {
+        background-color: transparent;
+    }
+    </style>
+</body>
+</html>

@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>My Random HTML Page</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js" integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="main">
@@ -25,7 +26,7 @@
         </div>
     </div>
     <script>
-        const channel = new BroadcastChannel('cacaprout');
+        const socket = io('http://51.68.49.74:3000');
         const messageContainer = document.getElementById("messageContainer");
         let state = {
             movieName: '',
@@ -57,14 +58,10 @@
                 actorElement.classList.add('actor');
             });
         }
-
-        channel.onmessage = function(event) {
-            console.log(event);
-            const message = event.data;
+        socket.on('message', (message) => {
             state = message;
-            console.log(state);
             displayState();
-        };
+        });
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@800&display=swap');

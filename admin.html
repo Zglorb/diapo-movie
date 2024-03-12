@@ -3,6 +3,7 @@
 <head>
     <title>Movie Overlay Admin</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js" integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4" crossorigin="anonymous"></script>
 </head>
 <body>
     <template id="thumbnail">
@@ -95,6 +96,8 @@
     </div>
 
     <script>
+        const socket = io('http://51.68.49.74:3000');
+        
         // Create a new Broadcast Channel named "test"
         const channel = new BroadcastChannel('cacaprout');
 
@@ -262,12 +265,13 @@
 
         function sendState() {
             console.log('State sent:', state);
-            channel.postMessage(state);
+            socket.emit('message', state);
         }
 
         function previousImage() {
             if (index > 0) {
                 index--;
+                clearSelection();
                 selectImage(index);
             }
         }
@@ -275,6 +279,7 @@
         function nextImage() {
             if (index < filesDropped.length - 1) {
                 index++;
+                clearSelection();
                 selectImage(index);
             }
         }
@@ -292,6 +297,13 @@
             }
             pause();
             document.getElementById('slide-time').value = 5000;
+        }
+
+        function clearSelection() {
+            const thumbnails = document.getElementsByClassName('thumbnail-container');
+            for (let i = 0; i < thumbnails.length; i++) {
+                thumbnails[i].classList.remove('selected');
+            }
         }
 
         updateProgression(0);

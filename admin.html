@@ -297,6 +297,15 @@
             }
             pause();
             document.getElementById('slide-time').value = 5000;
+            state = {
+                movieName: '',
+                year: '',
+                moviePoster: '',
+                director: '',
+                actors: [],
+                diapo: ''
+            }
+            sendState();
         }
 
         function clearSelection() {

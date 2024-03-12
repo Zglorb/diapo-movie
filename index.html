@@ -11,7 +11,7 @@
         <div id="movie">
             <div class="container">
                 <div class="poster">
-                    <img class="border" src="/poster.jpg" alt="poster" />
+                    <img class="border" src="./poster.jpg" alt="poster" />
                 </div>
                 <div class="title">
                   <div class="director dosis">Realisateur</div>
@@ -20,7 +20,7 @@
                 <div class="actors">
                 </div>
                 <div class="diapo">
-                    <img class="border" style="height: calc(100% - 20px);" src="/screen.jpg" />
+                    <img class="border" style="height: calc(100% - 20px);" src="./screen.jpg" />
                 </div>
             </div>
         </div>
@@ -40,8 +40,8 @@
         function displayState(){
             document.querySelector('.moviename').innerHTML = `${state.movieName} (${state.year.slice(0, 4)})`;
             document.querySelector('.director').innerHTML = state.director;
-            document.querySelector('.poster img').src = state.moviePoster;
-            document.querySelector('.diapo img').src = state.diapo;
+            document.querySelector('.poster img').src = state.moviePoster ? state.moviePoster : './poster.jpg';
+            document.querySelector('.diapo img').src = state.diapo ? state.diapo : './screen.jpg';
             const actors = document.querySelector('.actors');
             actors.innerHTML = '';
             state.actors.forEach(actor => {
@@ -122,8 +122,9 @@
     font-size: 3.5em;
     font-weight: bold;
     -webkit-text-fill-color: white; /* Will override color (regardless of order) */
-    -webkit-text-stroke-width: 4px;
+    -webkit-text-stroke-width: 2px;
     -webkit-text-stroke-color: black;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
     .actors {
@@ -163,7 +164,7 @@
         box-shadow: 0 0 10px 0 black;
     }
     .actorName {
-        font-size: 1.2em;
+        font-size: 1.5em;
         -webkit-text-fill-color: rgb(0, 0, 0); /* Will override color (regardless of order) */
         -webkit-text-stroke-width: 1px;
         -webkit-text-stroke-color: white;

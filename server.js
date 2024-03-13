@@ -1,36 +1,20 @@
-const socketIO = require('socket.io');
-const io = socketIO(undefined,{
+const Server = require('socket.io').Server;
+const io = new Server({
     cors: {
       origin: "*",
       methods: ["GET", "POST"]
-    }
+    },
+    maxHttpBufferSize: 1e8
   });
 
 const clients = {};
 
 io.on('connection', (socket) => {
-    const clientIP = socket.handshake.address;
-    console.log(`Client connected: ${clientIP}`);
-
-    // Store the socket for the client with the same IP address
-    if (!clients[clientIP]) {
-        clients[clientIP] = [];
-    }
-    clients[clientIP].push(socket);
 
     socket.on('message', (data) => {
-        // Broadcast the message to all sockets with the same IP address
-        clients[clientIP].forEach((clientSocket) => {
-            clientSocket.emit('message', data);
-        });
-    });
-
-    socket.on('disconnect', () => {
-        // Remove the socket from the clients list when disconnected
-        const index = clients[clientIP].indexOf(socket);
-        if (index !== -1) {
-            clients[clientIP].splice(index, 1);
-        }
+        // Broadcast the message to everyone
+        io.emit('message', data);
+        // socket.broadcast.emit('message', data);
     });
 });
 

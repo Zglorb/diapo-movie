@@ -115,6 +115,23 @@
             diapo: ''
         }
 
+        function fileToBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onload = function(event) {
+                // 'event.target.result' contains the buffer representing the file
+                resolve(event.target.result);
+                };
+
+                reader.onerror = function(error) {
+                reject(error);
+                };
+
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
 
         customElements.define('thumbnail-container', class extends HTMLElement {
             constructor(name, picture) {
@@ -258,8 +275,9 @@
                 thumbnails[index - 1].classList.remove('selected');
             }
             console.log(thumbnails)
-            thumbnails[index].classList.add('selected');
-            state.diapo = await fileToBase64(filesDropped[index]);
+            thumbnails[index].classList.add('selected')
+            console.log('send', filesDropped[index]);
+            state.diapo = await fileToBuffer(filesDropped[index]);
             sendState();
         }
 

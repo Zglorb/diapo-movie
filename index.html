@@ -14,8 +14,8 @@
                     <img class="border" src="./poster.jpg" alt="poster" />
                 </div>
                 <div class="title">
-                  <div class="director dosis">Realisateur</div>
-                  <div class="moviename dosis">FILM</div>
+                  <div class="director roboto">Realisateur</div>
+                  <div class="moviename roboto">FILM</div>
                 </div>
                 <div class="actors">
                 </div>
@@ -43,8 +43,8 @@
             } else {
                 document.querySelector('.diapo img').src = './screen.jpg';
             }
-            document.querySelector('.moviename').innerHTML = `${state.movieName} (${state.year.slice(0, 4)})`;
-            document.querySelector('.director').innerHTML = state.director;
+            document.querySelector('.moviename').innerHTML = state.movieName ? `${state.movieName} (${state.year.slice(0, 4)})` : "Film";
+            document.querySelector('.director').innerHTML = state.director ? state.director : 'Réalisateur';
             document.querySelector('.poster img').src = state.moviePoster ? state.moviePoster : './poster.jpg';
             const actors = document.querySelector('.actors');
             actors.innerHTML = '';
@@ -52,7 +52,7 @@
                 const actorElement = document.createElement('div');
                 const name = document.createElement('div');
                 name.classList.add('actorName');
-                name.classList.add('dosis');
+                name.classList.add('roboto');
                 const profile = document.createElement('img');
                 profile.src = `https://image.tmdb.org/t/p/w500${actor.profile_path}`;
                 actorElement.appendChild(profile);
@@ -68,12 +68,11 @@
         });
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dosis:wght@800&display=swap');
-        .dosis {
-        font-family: "Dosis", sans-serif;
-        font-optical-sizing: auto;
-        font-weight: 800;
-        font-style: normal;
+       @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700;900&display=swap');
+       .roboto {
+            font-family: "Roboto", sans-serif;
+            font-weight: 900;
+            font-style: normal;
         }
         #main {
             display: flex;
@@ -125,8 +124,8 @@
     grid-area: moviename;
     font-size: 3.5em;
     font-weight: bold;
-    -webkit-text-fill-color: white; /* Will override color (regardless of order) */
-    -webkit-text-stroke-width: 2px;
+    color: white;
+    -webkit-text-stroke-width: 3px;
     -webkit-text-stroke-color: black;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }

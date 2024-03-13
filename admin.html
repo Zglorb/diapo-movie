@@ -251,6 +251,9 @@
         }
 
         function play() {
+            if (filesDropped.length === 0) {
+                return;
+            }
             selectImage(index);
             const element = document.getElementById('play');
             element.innerHTML = 'pause';

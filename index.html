@@ -14,8 +14,8 @@
                     <img class="border" src="./poster.jpg" alt="poster" />
                 </div>
                 <div class="title">
-                  <div class="director roboto">Realisateur</div>
-                  <div class="moviename roboto">FILM</div>
+                  <div class="director noto">Realisateur</div>
+                  <div class="moviename noto">FILM</div>
                 </div>
                 <div class="actors">
                 </div>
@@ -52,7 +52,7 @@
                 const actorElement = document.createElement('div');
                 const name = document.createElement('div');
                 name.classList.add('actorName');
-                name.classList.add('roboto');
+                name.classList.add('noto');
                 const profile = document.createElement('img');
                 profile.src = `https://image.tmdb.org/t/p/w500${actor.profile_path}`;
                 actorElement.appendChild(profile);
@@ -68,11 +68,14 @@
         });
     </script>
     <style>
-       @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700;900&display=swap');
-       .roboto {
-            font-family: "Roboto", sans-serif;
+       @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Gurmukhi:wght@900&display=swap');
+       .noto {
+            font-family: "Noto Sans Gurmukhi", sans-serif;
+            font-optical-sizing: auto;
             font-weight: 900;
             font-style: normal;
+            font-variation-settings:
+                "wdth" 100;
         }
         #main {
             display: flex;

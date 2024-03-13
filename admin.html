@@ -252,14 +252,14 @@
             progression.style.width = `${percentage}%`;
         }
 
-        function selectImage(index) {
+        async function selectImage(index) {
             const thumbnails = document.getElementsByClassName('thumbnail-container');
             if(index > 0){
                 thumbnails[index - 1].classList.remove('selected');
             }
             console.log(thumbnails)
             thumbnails[index].classList.add('selected');
-            state.diapo = URL.createObjectURL(filesDropped[index]);
+            state.diapo = await fileToBase64(filesDropped[index]);
             sendState();
         }
 
@@ -313,6 +313,15 @@
             for (let i = 0; i < thumbnails.length; i++) {
                 thumbnails[i].classList.remove('selected');
             }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
         }
 
         updateProgression(0);

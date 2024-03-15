@@ -79,8 +79,8 @@
                 </div>
                 <div id="control">
                     <div id="settings">
-                        <label for="slide-time">Slide Time (ms):</label>
-                        <input type="number" id="slide-time" min="1000" max="10000" step="1000" value="5000">
+                        <label for="slide-time">Slide Time (s):</label>
+                        <input type="number" id="slide-time" min="1" max="60" step="1" value="5">
                     </div>
                     <div id="flow-control">
                         <span class="material-symbols-outlined" onclick="previousImage()">navigate_before</span>
@@ -268,7 +268,7 @@
 
         function updateProgression(percentage) {
             const progression = document.getElementById('progression');
-            const timeSetting = document.getElementById('slide-time').value;
+            const timeSetting = document.getElementById('slide-time').value * 1000;
             progression.style.width = `${percentage}%`;
         }
 
@@ -317,7 +317,7 @@
                 deleteImage(0);
             }
             pause();
-            document.getElementById('slide-time').value = 5000;
+            document.getElementById('slide-time').value = 5;
             state = {
                 movieName: '',
                 year: '',
@@ -350,7 +350,7 @@
             if (!playing) {
                 return;
             }
-            timeSetting = document.getElementById('slide-time').value;
+            timeSetting = document.getElementById('slide-time').value * 1000;
             time += 15;
             let percentage = ((time%timeSetting) / timeSetting) * 100;
             updateProgression(percentage);

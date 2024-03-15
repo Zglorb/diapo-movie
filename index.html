@@ -44,7 +44,7 @@
                 document.querySelector('.diapo img').src = './screen.jpg';
             }
             document.querySelector('.moviename').innerHTML = state.movieName ? `${state.movieName} (${state.year.slice(0, 4)})` : "Film";
-            document.querySelector('.director').innerHTML = state.director ? state.director : 'Réalisateur';
+            document.querySelector('.director').innerHTML = state.director ? state.director : 'Realisateur';
             document.querySelector('.poster img').src = state.moviePoster ? state.moviePoster : './poster.jpg';
             const actors = document.querySelector('.actors');
             actors.innerHTML = '';

@@ -8,23 +8,32 @@
 <body>
     <template id="thumbnail">
         <div class="thumbnail-container">
-            <img src="" alt="Thumbnail">
+            <img class="media" src="" alt="Thumbnail">
+            <video class="media" src="" alt="Thumbnail" hidden></video>
             <div class="overlay">
-                <span class="delete-icon">&times;</span>
+                <span class="status">&times;</span>
+            </div>
+            <div class="loadingOverlay">
+                <img class="status" src="./loading.svg" alt="loading">
             </div>
         </div>
         <style>
             .thumbnail-container {
                 position: relative;
             }
-            img {
+            .media {
                 width: 100%;
                 height: 100%;
+            }
+            .status {
+                width: 64px;
+                height: 64px;
             }
             .thumbnail-container:hover .overlay {
                 opacity: 1;
             }
-            .overlay {
+
+            .overlay,.loadingOverlay {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -37,6 +46,9 @@
                 opacity: 0;
                 transition: opacity 0.5s;
                 cursor: pointer;
+            }
+            .loadingOverlay {
+                opacity: 1;
             }
         </style>
     </template>
@@ -75,7 +87,7 @@
                     <div id="thumbnails"></div>
                 </div>
                 <div id="progressbar">
-                    <div id="progression"></div>
+                    <div id="progression" class=""></div>
                 </div>
                 <div id="control">
                     <div id="settings">
@@ -112,8 +124,9 @@
             moviePoster: '',
             director: '',
             actors: [],
-            diapo: ''
+            diapo: -1
         }
+        let loopTimeout = undefined
 
         function fileToBuffer(file) {
             return new Promise((resolve, reject) => {
@@ -158,8 +171,10 @@
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 // Perform necessary operations with the dropped file
-                console.log(file);
+                file.loaded = false;
                 filesDropped.push(file);
+                console.log(filesDropped);
+                sendFile(file, filesDropped.length - 1);
                 // Display dropped file thumbnails
                 const thumbnailsContainer = document.getElementById('thumbnails');
                 const thumbnail = document.createElement('thumbnail-container');
@@ -168,8 +183,16 @@
                 overlay.onclick = function() {
                     deleteImage(filesDropped.indexOf(file));
                 }
-                const img = thumbnail.shadowRoot.querySelector('img');
-                img.src = URL.createObjectURL(file);
+                if (file.type.startsWith('video')) {
+                    const video = thumbnail.shadowRoot.querySelector('video');
+                    video.src = URL.createObjectURL(file);
+                    video.hidden = false;
+                    const img = thumbnail.shadowRoot.querySelector('img');
+                    img.hidden = true;
+                } else {
+                    const img = thumbnail.shadowRoot.querySelector('img');
+                    img.src = URL.createObjectURL(file);
+                }
                 thumbnailsContainer.appendChild(thumbnail);
             }
         }
@@ -258,35 +281,64 @@
             const element = document.getElementById('play');
             element.innerHTML = 'pause';
             playing = true;
+            loop()
         }
 
         function pause() {
+            if (loopTimeout){
+                clearTimeout(loopTimeout)
+            }
             const element = document.getElementById('play');
             element.innerHTML = 'play_arrow';
             playing = false;
+            progression.style.transition = 'width 0s linear';
+            updateProgression(0);
         }
 
         function updateProgression(percentage) {
             const progression = document.getElementById('progression');
-            const timeSetting = document.getElementById('slide-time').value * 1000;
             progression.style.width = `${percentage}%`;
         }
 
         async function selectImage(index) {
             const thumbnails = document.getElementsByClassName('thumbnail-container');
+            const progression = document.getElementById('progression');
+            const timeSetting = document.getElementById('slide-time').value;
+            progression.style.transition = 'width 0s linear';
+            updateProgression(0);
+            setTimeout(() => {
+                progression.style.transition = `width ${timeSetting}s linear`;
+                updateProgression(100);
+            }, 30);
             if(index > 0){
                 thumbnails[index - 1].classList.remove('selected');
             }
             console.log(thumbnails)
             thumbnails[index].classList.add('selected')
+
             console.log('send', filesDropped[index]);
-            state.diapo = await fileToBuffer(filesDropped[index]);
+            state.diapo = index;
             sendState();
+        }
+
+        async function sendFile(file, index) {
+            const buffer = await fileToBuffer(file);
+            socket.emit('message', {type: "newFile", data: {
+                buffer: buffer,
+                type: file.type,
+                index: index
+            }});
+        }
+
+        async function removeFile(index) {
+            socket.emit('message', {type: "removeFile", data: {
+                index: index
+            }});
         }
 
         function sendState() {
             console.log('State sent:', state);
-            socket.emit('message', state);
+            socket.emit('message', {type: "newState", data: state});
         }
 
         function previousImage() {
@@ -308,6 +360,7 @@
         function deleteImage(index) {
             filesDropped.splice(index, 1);
             const thumbnails = document.getElementsByClassName('thumbnail-container');
+            removeFile(index);
             thumbnails[index].remove();
         }
 
@@ -324,7 +377,7 @@
                 moviePoster: '',
                 director: '',
                 actors: [],
-                diapo: ''
+                diapo: -1
             }
             sendState();
         }
@@ -345,27 +398,55 @@
             });
         }
 
-        updateProgression(0);
-        setInterval(() => {
-            if (!playing) {
-                return;
-            }
-            timeSetting = document.getElementById('slide-time').value * 1000;
-            time += 15;
-            let percentage = ((time%timeSetting) / timeSetting) * 100;
-            updateProgression(percentage);
-            if (((time + 15) %timeSetting) < (time%timeSetting)) {
+        // updateProgression(0);
+        function loop(){
+            loopTimeout = setTimeout(() => {
+                if (!playing) {
+                    return;
+                }
                 index++;
                 if (index >= filesDropped.length) {
-                    pause();
+                    // pause();
                     document.getElementsByClassName('thumbnail-container')[index - 1].classList.remove('selected');
                     index = 0;
                     time = 0;
-                    return;
                 }
                 selectImage(index);
+                loop()
+            },
+            document.getElementById('slide-time').value * 1000)
+        }
+        // setInterval(() => {
+        //     if (!playing) {
+        //         return;
+        //     }
+        //     timeSetting = document.getElementById('slide-time').value * 1000;
+        //     time += 15;
+        //     let percentage = ((time%timeSetting) / timeSetting) * 100;
+        //     updateProgression(percentage);
+        //     if (((time + 15) %timeSetting) < (time%timeSetting)) {
+
+        //     }
+        // }, 15);
+
+        function fileLoaded(index){
+            filesDropped[index].loaded = true;
+            console.log('File loaded ' + index);
+            const thumbnails = document.getElementsByClassName('thumbnail-container');
+            console.log(thumbnails[index].shadowRoot.querySelector('.loadingOverlay'));
+            thumbnails[index].shadowRoot.querySelector('.loadingOverlay').remove();
+        }
+        socket.on('connect', () => {
+            socket.emit('message', {type: 'reset'})
+        });
+        socket.on('message', (message) => {
+            let data = message.data;
+            switch (message.type){
+                case 'fileLoaded':
+                    fileLoaded(data.index);
+                    break;
             }
-        }, 15);
+        });
     </script>
 </body>
 <style>
@@ -468,6 +549,7 @@
         margin-left: 2px;
         margin-right: 2px;
         cursor: pointer;
+        user-select: none;
     }
     #settings {
         display: flex;
@@ -485,10 +567,15 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 50%;
+        width: 0%;
         height: 100%;
         background-color: #d6c800;
+        transition: width 5s linear;
     }
+    /* .full{
+        width: 100% !important;
+        transition: width 0s linear;
+    } */
     .thumbnail-container {
         border: 2px solid transparent;
     }

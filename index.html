@@ -14,13 +14,14 @@
                     <img class="border" src="./poster.jpg" alt="poster" />
                 </div>
                 <div class="title">
-                  <div class="director noto">Realisateur</div>
-                  <div class="moviename noto">FILM</div>
+                    <div class="director noto">Realisateur</div>
+                    <div class="moviename noto">FILM</div>
                 </div>
                 <div class="actors">
                 </div>
                 <div class="diapo">
-                    <img class="border" style="height: calc(100% - 20px);" src="./screen.jpg" />
+                    <video style="height: calc(100% - 20px);" class="border" id="video" autoplay hidden></video>
+                    <img style="height: calc(100% - 20px);" class="border" src="./screen.jpg" />
                 </div>
             </div>
         </div>
@@ -28,19 +29,33 @@
     <script>
         const socket = io('https://caca.ovh');
         const messageContainer = document.getElementById("messageContainer");
+        let files = [];
         let state = {
             movieName: '',
             moviePoster: '',
             year: '',
             director: '',
             actors: [],
-            diapo: ''
+            diapo: -1
         }
         function displayState(){
-            if (state.diapo){
-                const url = URL.createObjectURL(new Blob([state.diapo]));
-                document.querySelector('.diapo img').src = url;
+            if (state.diapo >= 0 && files[state.diapo]){
+                let blob = new Blob([files[state.diapo].buffer]);
+                if(files[state.diapo].type.startsWith('video')){
+                    const video = document.querySelector('video');
+                    video.src = URL.createObjectURL(blob);
+                    video.hidden = false;
+                    document.querySelector('.diapo img').hidden = true;
+                    video.oncanplay = () => video.play();
+                    return;
+                }{
+                    const url = URL.createObjectURL(blob);
+                    document.querySelector('.diapo img').src = url;
+                    document.querySelector('.diapo img').hidden = false;
+                    document.querySelector('.diapo video').hidden = true;
+                }
             } else {
+                document.querySelector('.diapo video').hidden = true;
                 document.querySelector('.diapo img').src = './screen.jpg';
             }
             document.querySelector('.moviename').innerHTML = state.movieName ? `${state.movieName} (${state.year.slice(0, 4)})` : "FILM";
@@ -62,9 +77,51 @@
                 actorElement.classList.add('actor');
             });
         }
-        socket.on('message', (message) => {
-            state = message;
+        function newState(newState){
+            state = newState;
             displayState();
+        }
+        function newFile(buffer, type, index){
+            files[index] = {buffer, type};
+            console.log(files);
+            fileLoaded(index);
+        }
+        function removeFile(index){
+            files.splice(index, 1);
+            console.log("remove", files);
+            displayState();
+        }
+        function fileLoaded(index){
+            socket.emit('message', {type: 'fileLoaded', data: {index}});
+        }
+        function reset(){
+            files = [];
+            state = {
+                movieName: '',
+                moviePoster: '',
+                year: '',
+                director: '',
+                actors: [],
+                diapo: -1
+            }
+            displayState();
+        }
+        socket.on('message', (message) => {
+            let data = message.data;
+            switch (message.type){
+                case 'newState':
+                    newState(data);
+                    break;
+                case 'newFile':
+                    newFile(data.buffer, data.type, data.index);
+                    break;
+                case 'removeFile':
+                    removeFile(data.index);
+                    break;
+                case 'reset':
+                    reset();
+                    break;
+            }
         });
     </script>
     <style>
@@ -150,7 +207,8 @@
     grid-area: actors;
     }
 
-    .diapo { grid-area: diapo; }
+    .diapo {
+        grid-area: diapo;}
     .actor {
         display: flex;
         flex-direction: column;

@@ -342,19 +342,30 @@
         }
 
         function previousImage() {
+            if(filesDropped.length === 0){
+                return;
+            }
             if (index > 0) {
                 index--;
-                clearSelection();
-                selectImage(index);
+            }else{
+                index = filesDropped.length - 1;
             }
+            clearSelection();
+            selectImage(index);
         }
 
         function nextImage() {
+            if (filesDropped.length === 0) {
+                return;
+            }
             if (index < filesDropped.length - 1) {
                 index++;
-                clearSelection();
-                selectImage(index);
             }
+            else {
+                index = 0;
+            }
+            clearSelection();
+            selectImage(index);
         }
 
         function deleteImage(index) {
